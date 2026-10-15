@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
-using UnityEngine.InputSystem; // MIGRATED: New Input System namespace
+using UnityEngine.InputSystem;
+using System.Net.NetworkInformation; // MIGRATED: New Input System namespace
+using System.IO;
 
 public class MainManager : MonoBehaviour
 {
@@ -12,6 +14,7 @@ public class MainManager : MonoBehaviour
     public Rigidbody Ball;
 
     public Text ScoreText;
+    public Text BestScoreText;
     public GameObject GameOverText;
 
     private bool m_Started = false;
@@ -25,7 +28,9 @@ public class MainManager : MonoBehaviour
     // MIGRATED: bind the Space key as a button action
     void Awake()
     {
+        m_Points = 0;
         m_LaunchAction = new InputAction("Launch", InputActionType.Button, "<Keyboard>/space");
+        BestScoreText.text = $"Best Score: {DataPersistance.Instance.BestScorePlayerName} : {DataPersistance.Instance.BestScore}";
     }
 
     // MIGRATED: enable the action while the component is active
@@ -51,7 +56,7 @@ public class MainManager : MonoBehaviour
         {
             for (int x = 0; x < perLine; ++x)
             {
-                Vector3 position = new Vector3(-1.5f + step * x, 2.5f + i * 0.3f, 0);
+                Vector3 position = new(-1.5f + step * x, 2.5f + i * 0.3f, 0);
                 var brick = Instantiate(BrickPrefab, position, Quaternion.identity);
                 brick.PointValue = pointCountArray[i];
                 brick.onDestroyed.AddListener(AddPoint);
@@ -67,7 +72,7 @@ public class MainManager : MonoBehaviour
             {
                 m_Started = true;
                 float randomDirection = Random.Range(-1.0f, 1.0f);
-                Vector3 forceDir = new Vector3(randomDirection, 1, 0);
+                Vector3 forceDir = new(randomDirection, 1, 0);
                 forceDir.Normalize();
 
                 Ball.transform.SetParent(null);
@@ -89,9 +94,41 @@ public class MainManager : MonoBehaviour
         ScoreText.text = $"Score : {m_Points}";
     }
 
+    void CheckForBestScore()
+    {
+        if (m_Points > DataPersistance.Instance.BestScore)
+        {
+            DataPersistance.Instance.BestScore = m_Points;
+            DataPersistance.Instance.BestScorePlayerName = DataPersistance.Instance.PlayerName;
+            SaveBestScore();
+            BestScoreText.text = $"Best Score: {DataPersistance.Instance.BestScorePlayerName} : {DataPersistance.Instance.BestScore}";
+        }
+    }
+
+    [System.Serializable]
+    public class SaveData
+    {
+        public int BestScore;
+        public string BestScorePlayerName;
+    }
+
+    public void SaveBestScore()
+    {
+        SaveData data = new()
+        {
+            BestScore = DataPersistance.Instance.BestScore,
+            BestScorePlayerName = DataPersistance.Instance.BestScorePlayerName
+        };
+
+        string json = JsonUtility.ToJson(data);
+
+        File.WriteAllText(Application.persistentDataPath + "/highscore.json", json);
+    }
+
     public void GameOver()
     {
         m_GameOver = true;
+        CheckForBestScore();
         GameOverText.SetActive(true);
     }
 }
