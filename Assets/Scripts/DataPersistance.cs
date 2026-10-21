@@ -30,4 +30,12 @@ public class DataPersistance : MonoBehaviour
     {
 
     }
+
+    [System.Serializable]
+    public class SaveData
+    {
+        public int BestScore;
+        public string BestScorePlayerName;
+    }
+
 }

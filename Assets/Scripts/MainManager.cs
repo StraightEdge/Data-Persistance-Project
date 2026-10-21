@@ -105,24 +105,17 @@ public class MainManager : MonoBehaviour
         }
     }
 
-    [System.Serializable]
-    public class SaveData
-    {
-        public int BestScore;
-        public string BestScorePlayerName;
-    }
-
     public void SaveBestScore()
     {
-        SaveData data = new()
+        DataPersistance.SaveData data = new()
         {
             BestScore = DataPersistance.Instance.BestScore,
             BestScorePlayerName = DataPersistance.Instance.BestScorePlayerName
         };
 
-        string json = JsonUtility.ToJson(data);
+        string json = JsonUtility.ToJson(data); ;
 
-        File.WriteAllText(Application.persistentDataPath + "/highscore.json", json);
+        File.WriteAllText(Application.persistentDataPath + "/bestscore.json", json);
     }
 
     public void GameOver()

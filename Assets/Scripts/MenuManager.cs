@@ -29,15 +29,16 @@ public class MenuManager : MonoBehaviour
 
     public void LoadBestScore()
     {
-        string path = Application.persistentDataPath + "/highscore.json";
+        string path = Application.persistentDataPath + "/bestscore.json";
         if (File.Exists(path))
         {
             string json = File.ReadAllText(path);
-            MainManager.SaveData data = JsonUtility.FromJson<MainManager.SaveData>(json);
+            DataPersistance.SaveData data = JsonUtility.FromJson<DataPersistance.SaveData>(json);
 
             DataPersistance.Instance.BestScore = data.BestScore;
             DataPersistance.Instance.BestScorePlayerName = data.BestScorePlayerName;
-        } else
+        }
+        else
         {
             DataPersistance.Instance.BestScore = 0;
             DataPersistance.Instance.BestScorePlayerName = "";
